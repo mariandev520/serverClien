@@ -1,24 +1,29 @@
-import logo from './logo.svg';
-import './App.css';
+import * as React from "react";
+import { fetchUtils, Admin, Resource } from 'react-admin';
+
+import simpleRestProvider from 'ra-strapi-rest';
+import authProvider from './authProvider'
+import Cookies from './helpers/Cookies';
+import PostIcon from '@material-ui/icons/Book';
+
+import { PostList, PostEdit, PostCreate } from './posts';
+
+const httpClient = (url, options = {}) => {
+  if (!options.headers) {
+      options.headers = new Headers({ Accept: 'application/json' });
+  }
+  const token = Cookies.getCookie('token')
+  options.headers.set('Authorization', `Bearer ${token}`);
+  return fetchUtils.fetchJson(url, options);
+}
+
+const dataProvider = simpleRestProvider('http://localhost:1337', httpClient);
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Admin authProvider={authProvider} dataProvider={dataProvider}>
+        <Resource name="posts" list={PostList} edit={PostEdit} create={PostCreate} icon={PostIcon}/>
+    </Admin>
   );
 }
 
